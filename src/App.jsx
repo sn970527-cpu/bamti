@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PortalHome from './components/PortalHome';
 import AdminPanel from './components/AdminPanel';
 import Modal from './components/Modal';
+import EthicsGate from './components/EthicsGate';
 
 // 처음에 접속했을 때 포털을 가득 채워줄 예시 학습용 웹앱 데이터
 const SEED_APPS = [
@@ -48,12 +49,16 @@ export default function App() {
   const [currentView, setCurrentView] = useState('home'); // 'home' | 'admin'
   const [theme, setTheme] = useState('light');
   const [toasts, setToasts] = useState([]);
+  const [hasAgreedEthics, setHasAgreedEthics] = useState(false);
   
   // 팝업 모달 관리를 위한 상태 ('terms' | 'privacy' | null)
   const [activeModal, setActiveModal] = useState(null);
 
   // 1. 컴포넌트 마운트 시 localStorage에서 앱 데이터 및 테마 세팅
   useEffect(() => {
+    // 윤리 가이드 동의 여부 로드
+    const agreed = localStorage.getItem('learning_portal_ethics_agreed') === 'true';
+    setHasAgreedEthics(agreed);
     // 앱 데이터 로드
     const storedApps = localStorage.getItem('learning_portal_apps');
     if (storedApps) {
@@ -123,6 +128,29 @@ export default function App() {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  if (!hasAgreedEthics) {
+    return (
+      <>
+        <EthicsGate onAgree={() => {
+          setHasAgreedEthics(true);
+          localStorage.setItem('learning_portal_ethics_agreed', 'true');
+          addToast('윤리 핵심 가이드를 지키기로 약속했습니다! 환영합니다! 🚀', 'success');
+        }} />
+        {/* 우측 하단 동적 토스트 알림창 */}
+        <div className="toast-container">
+          {toasts.map((toast) => (
+            <div 
+              key={toast.id} 
+              className={`toast ${toast.type === 'success' ? 'toast-success' : 'toast-error'}`}
+            >
+              {toast.type === 'success' ? '✅' : '⚠️'} {toast.message}
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       {/* 프리미엄 상단 헤더 */}
@@ -177,6 +205,10 @@ export default function App() {
             onSaveApp={saveApp} 
             onDeleteApp={deleteApp} 
             onAddToast={addToast}
+            onResetEthics={() => {
+              setHasAgreedEthics(false);
+              addToast('윤리 가이드 동의 상태가 초기화되었습니다. 다시 서명이 필요합니다! 🔄', 'success');
+            }}
           />
         )}
       </main>

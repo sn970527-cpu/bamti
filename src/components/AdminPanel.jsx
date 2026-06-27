@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 const AVAILABLE_CATEGORIES = ['언어', '수학', '과학', '코딩', '암기', '퀴즈', '기타'];
 const ADMIN_CODE = 'admin123'; // 기본 관리자 비밀코드
 
-export default function AdminPanel({ apps, onSaveApp, onDeleteApp, onAddToast }) {
+export default function AdminPanel({ apps, onSaveApp, onDeleteApp, onAddToast, onResetEthics }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [inputCode, setInputCode] = useState('');
   const [authError, setAuthError] = useState('');
@@ -297,6 +297,30 @@ export default function AdminPanel({ apps, onSaveApp, onDeleteApp, onAddToast })
             )}
           </div>
         </form>
+      </div>
+
+      {/* 윤리 가이드 설정 초기화 */}
+      <div className="app-form-card" style={{ marginTop: '20px' }}>
+        <h3 className="admin-panel-title">⚙️ 포털 시스템 설정</h3>
+        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '14px', lineHeight: '1.5' }}>
+          학생들이 학습 포털에 입장할 때 나오는 <strong>'생성형 AI 윤리 핵심 약속'</strong> 화면의 동의 상태를 초기화할 수 있습니다. 
+          초기화하면 다음 접속 시 다시 게이트 화면이 활성화됩니다.
+        </p>
+        <button 
+          type="button" 
+          className="btn btn-secondary" 
+          style={{ width: '100%', justifyContent: 'center', borderColor: '#dc2626', color: '#dc2626' }}
+          onClick={() => {
+            if (window.confirm('정말로 학생들의 윤리 가이드 약속 상태를 초기화하시겠습니까? 다음 입장 시 약속 화면이 다시 나타납니다.')) {
+              localStorage.removeItem('learning_portal_ethics_agreed');
+              if (onResetEthics) {
+                onResetEthics();
+              }
+            }
+          }}
+        >
+          🔄 윤리 약속 강제 초기화 (게이트 다시 열기)
+        </button>
       </div>
 
       {/* 오른쪽: 등록된 앱 관리 리스트 */}
